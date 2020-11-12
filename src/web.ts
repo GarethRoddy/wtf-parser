@@ -19,8 +19,11 @@ async function processFile(e) {
     var file = e.files[0]
     let fileData = await readFileData(file);
     console.log ({ fileData });
-    let wtf = new WintracFile(new Uint8Array(fileData as ArrayBuffer), "");
+    console.time("wintrac-parse");
+    const typedArray = new Uint8Array(fileData as ArrayBuffer);
+    let wtf = new WintracFile([...typedArray], "");
     let records = await wtf.getRecords();
+    console.timeEnd("wintrac-parse");
     console.log("testWTF: DeviceId:", "0x" + wtf.getDeviceTypeID().toString(16));
     console.log("Decoded records:")
     console.table(_.take(records, 100));

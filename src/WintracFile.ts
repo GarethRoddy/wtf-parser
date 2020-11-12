@@ -3,11 +3,11 @@ import *  as moment from 'moment';
 import * as Papa from 'papaparse';
 import *  as  _ from 'lodash'; 
 
-const sensorMap = require("./sensormap.json");
+const sensorMap = require("./wintrac-sensormap.json");
 
 export class WintracFile 
 {
-    constructor(private fileBuffer: Uint8Array, private fileName) {
+    constructor(private fileBuffer: number[], private fileName) {
         console.log("Filebuffer length:", this.fileBuffer.length);
     }
 
@@ -18,22 +18,35 @@ export class WintracFile
     findOffsets(buf, ...bytes) {
         let ptrs = [];
         for(let i = 0; i < buf.length; i++) {
-            if (_.isEqual(Array.from(buf.slice(i, i + bytes.length)), bytes)) {
+            if (_.isEqual(buf.slice(i, i + bytes.length), bytes)) {
                 ptrs.push(i);
             }
         }
         return ptrs;
     }
 
-    getFileSensorManifestOffset(buf) {
-        return _.first(this.findOffsets(buf, 0xFF, 0x4B, 0x04, 0x02, 0x0B)) + 5;
+    findFirstOffset(buf, ...bytes) {
+        for(let i = 0; i < buf.length; i++) {
+            if (_.isEqual(buf.slice(i, i + bytes.length), bytes)) {
+                return i;
+            }
+        }
+        return null;
     }
 
-    readUIntLE(array: Uint8Array, offset: number, count: number) {
+    getFileSensorManifestOffset(buf) {
+        let offset = this.findFirstOffset(buf, 0xFF, 0x4B, 0x04, 0x02, 0x0B);
+        if (offset) {
+            offset += 5;
+        }
+        return offset;
+    }
+
+    readUIntLE(array: number[], offset: number, count: number) {
         return _.range(count).reduce((acc, n) => acc + (array[offset + n] << (8*n)), 0);
     }
 
-    readIntLE(array: Uint8Array, offset: number, count: number) {
+    readIntLE(array: number[], offset: number, count: number) {
         const val = _.range(count).reduce((acc, n) => acc + ((array[offset + n] & ((n === (count -1)) ? 0x7F: 0xFF)) << (8*n)), 0);
 	    return (array[offset + count - 1] & 0x80) ? val - (Math.pow(256, count))/2 : val;
     }
@@ -67,7 +80,10 @@ export class WintracFile
 
     // Records begin with [0xFF, 0x46, 0x61] 
     getTemperatureRecords(buf, sensors) {
-        const records = this.findOffsets(buf, 0xFF, 0x46, 0x61).map((ptr, i, array) => { 
+        console.time("getTemperatureRecords");
+        let records = this.findOffsets(buf, 0xFF, 0x46, 0x61);
+        console.timeEnd("getTemperatureRecords");
+        records = records.map((ptr, i, array) => { 
             return (i < array.length) ? this.decodeRecord(buf.slice(ptr, array[i+1]), sensors): null;
         }).filter(_.isObject)
         console.log("getTemperatureRecords: Record count:", records.length);
@@ -97,7 +113,8 @@ export class WintracFile
 
     async getRecords() {
         const sensors = await this.getSensorList();
-        return this.getTemperatureRecords(this.fileBuffer, sensors).filter(row => row.Time >= '2001-01-01');    
+        const records = await this.getTemperatureRecords(this.fileBuffer, sensors);
+        return records;
     }
 
     async toCsv() {
@@ -106,5 +123,5 @@ export class WintracFile
     }
 }
 
-
+// Do we need this?
 module.exports = WintracFile;

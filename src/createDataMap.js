@@ -10,7 +10,9 @@ async function getDataMapFromXml(xmlFile) {
         const result = await parseString(xml, { mergeAttrs: true , explicitArray: false})
         let sensorTables  = result.TimedColumnList.typeID;
         let sensors = sensorTables.reduce((map, row) => { 
-            map[row.ID] = row.column.filter(col => sensorRegeX.test(col.Name)).map(col => _.pick(col, "Name", "BlockID", "DataID"));
+            map[row.ID] = row.column.filter(col => sensorRegeX.test(col.Name)).map(col => _.pick(col, "Name", "BlockID", "DataID")).map(col => { 
+                return { Name: col.Name, BlockID: parseInt(col.BlockID), BlockID: parseInt(col.BlockID) }
+            });
             return map;   
         }, {});
         return sensors;
@@ -22,7 +24,7 @@ async function getDataMapFromXml(xmlFile) {
 
 async function exportDataMap(xmlFile) {
     let sensors = await getDataMapFromXml(xmlFile);
-    fs.writeFileSync(path.join(__dirname, "./dist/sensormap.json"), JSON.stringify(sensors, null, 4));
+    fs.writeFileSync(path.join(__dirname, "./dist/wintrac-sensormap.json"), JSON.stringify(sensors, null, 4));
 }
 
 exportDataMap(path.join(__dirname, "/data/TimedColumnList.xml"))
