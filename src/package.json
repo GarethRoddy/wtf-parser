@@ -1,0 +1,22 @@
+{
+  "name": "wtf-parser",
+  "version": "0.2.0",
+  "description": "WTF File parser.",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc",
+    "build-watch": "tsc --watch",
+    "build-web": "browserify --debug ./dist/web.js -o ./dist/bundle.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@types/lodash": "^4.14.165",
+    "@types/node": "^14.14.7",
+    "lodash": "^4.17.20",
+    "moment": "^2.29.1",
+    "papaparse": "^5.3.0",
+    "xml2js": "^0.4.23"
+  }
+}
