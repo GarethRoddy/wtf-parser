@@ -14,10 +14,19 @@ export class WintracFile
         return this.fileBuffer[723];
     }
 
+    arraySegmentEquals(arr, offset, bytes) {
+        for(let i = 0; i < bytes.length; i++) {
+            if (arr[i+offset] !== bytes[i]) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     findOffsets(buf, ...bytes) {
         let ptrs = [];
         for(let i = 0; i < buf.length; i++) {
-            if (_.isEqual(buf.slice(i, i + bytes.length), bytes)) {
+            if (this.arraySegmentEquals(buf, i, bytes)) {
                 ptrs.push(i);
             }
         }
@@ -26,7 +35,7 @@ export class WintracFile
 
     findFirstOffset(buf, ...bytes) {
         for(let i = 0; i < buf.length; i++) {
-            if (_.isEqual(buf.slice(i, i + bytes.length), bytes)) {
+            if (this.arraySegmentEquals(buf, i, bytes)) {
                 return i;
             }
         }
