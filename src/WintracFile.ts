@@ -8,7 +8,6 @@ const sensorMap = require("./wintrac-sensormap.json");
 export class WintracFile 
 {
     constructor(private fileBuffer: number[], private fileName) {
-        console.log("Filebuffer length:", this.fileBuffer.length);
     }
 
     getDeviceTypeID() {
