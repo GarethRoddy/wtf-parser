@@ -2,7 +2,7 @@ const fs = require("fs");
 const path = require("path");
 const _ = require("lodash");
 
-const sensorRegeX = /setpoint|return(?! display)|coil|discharge(?! display| pressure)|ambient|spare/i
+const sensorRegeX = /setpoint|return(?! display)|coil|discharge(?! display| pressure)|ambient|spare|logger/i
 async function getDataMapFromXml(xmlFile) {
     const parseString = require('xml2js').parseStringPromise;
     try { 
@@ -11,7 +11,7 @@ async function getDataMapFromXml(xmlFile) {
         let sensorTables  = result.TimedColumnList.typeID;
         let sensors = sensorTables.reduce((map, row) => { 
             map[row.ID] = row.column.filter(col => sensorRegeX.test(col.Name)).map(col => _.pick(col, "Name", "BlockID", "DataID")).map(col => { 
-                return { Name: col.Name, BlockID: parseInt(col.BlockID), BlockID: parseInt(col.BlockID) }
+                return { Name: col.Name, BlockID: parseInt(col.BlockID, 16), DataID: parseInt(col.DataID, 16) }
             });
             return map;   
         }, {});

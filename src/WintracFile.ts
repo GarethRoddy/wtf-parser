@@ -58,10 +58,10 @@ export class WintracFile
             return null;
         }
         const [ blockID, dataID ] = [ buffer[sensorOffset], buffer[sensorOffset + 1]];
-        return sensors.find(s => (parseInt(s.BlockID, 16) === blockID) && (parseInt(s.DataID, 16) === dataID));
+        return sensors.find(s => s.BlockID === blockID && s.DataID === dataID);    
     }
 
-    async getSensorList() {
+    getSensorList() {
         let fileSensorOffset = this.getFileSensorManifestOffset(this.fileBuffer);
         const sensorCount = this.readUIntLE(this.fileBuffer, fileSensorOffset, 2);
         fileSensorOffset += 2;
@@ -80,14 +80,10 @@ export class WintracFile
 
     // Records begin with [0xFF, 0x46, 0x61] 
     getTemperatureRecords(buf, sensors) {
-        console.time("getTemperatureRecords");
         let records = this.findOffsets(buf, 0xFF, 0x46, 0x61);
-        console.timeEnd("getTemperatureRecords");
-        records = records.map((ptr, i, array) => { 
+        return records.map((ptr, i, array) => { 
             return (i < array.length) ? this.decodeRecord(buf.slice(ptr, array[i+1]), sensors): null;
-        }).filter(_.isObject)
-        console.log("getTemperatureRecords: Record count:", records.length);
-        return records;
+        }).filter(_.isObject);
     }
 
     decodeRecord(buf, sensors) {
@@ -111,14 +107,14 @@ export class WintracFile
         return (rawValue && rawValue !== 0x7FFF) ? rawValue / 32.0: null;
     }
 
-    async getRecords() {
-        const sensors = await this.getSensorList();
-        const records = await this.getTemperatureRecords(this.fileBuffer, sensors);
+    getRecords() {
+        const sensors = this.getSensorList();
+        const records = this.getTemperatureRecords(this.fileBuffer, sensors).filter(record => record.Time > '2001-01-01');
         return records;
     }
 
-    async toCsv() {
-        const records = await this.getRecords();
+    toCsv() {
+        const records = this.getRecords();
         return Papa.unparse(records);
     }
 }
