@@ -15,12 +15,13 @@ async function testWTF(wtfFilePath, csvPath) {
     console.log("testWTF: DeviceId:", "0x" + wtf.getDeviceTypeID().toString(16));
     console.log("testWTF: Sensors:", wtf.getSensorList());
     console.log("testWTF: Records:", records[0]);
+    console.log("testWTF: CSV:", wtf.toCsv());
 }
 
 //testWTF("../sample_files/00187--1.wtf", "../output_files/00187.csv");
 //testWTF(__dirname + "/../sample_files/MT577--1.wtf", __dirname + "/../output_files/MT577.csv");
 //testWTF("../sample_files/CU1171--1.wtf", "CU1171.csv");
 //testWTF("../sample_files/R4038--1.wtf", "R4038.csv");
-//testWTF(path.join(__dirname, "../sample_files/MT577--1.wtf"), path.join(__dirname, "../output_files/MT577.csv"));
-testWTF(path.join(__dirname, "../sample_files/CU1171--1.wtf"), path.join(__dirname, "../output_files/CU1171.csv"));
+testWTF(path.join(__dirname, "../sample_files/MT577--1.wtf"), path.join(__dirname, "../output_files/MT577.csv"));
+//testWTF(path.join(__dirname, "../sample_files/CU1171--1.wtf"), path.join(__dirname, "../output_files/CU1171.csv"));
 

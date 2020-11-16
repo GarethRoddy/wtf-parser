@@ -1,9 +1,10 @@
 {
   "name": "wtf-parser",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "WTF File parser.",
   "main": "app.js",
   "scripts": {
+    "pretest": "tsc",
     "test": "mocha",
     "build": "tsc",
     "build-watch": "tsc --watch",

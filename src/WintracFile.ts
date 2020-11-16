@@ -1,5 +1,4 @@
 
-import *  as moment from 'moment';
 import * as Papa from 'papaparse';
 import *  as  _ from 'lodash'; 
 
@@ -90,14 +89,14 @@ export class WintracFile
     getTemperatureRecords(buf, sensors) {
         let records = this.findOffsets(buf, 0xFF, 0x46, 0x61);
         return records.map((ptr, i, array) => { 
-            return (i < array.length) ? this.decodeRecord(buf.slice(ptr, array[i+1]), sensors): null;
+            return (i < array.length) ? this.decodeRecord(buf, ptr, sensors): null;
         }).filter(_.isObject);
     }
 
-    decodeRecord(buf, sensors) {
-        let record = { Time: this.decodeTimestamp(buf, 3).format("YYYY-MM-DD HH:mm") };
-        record = sensors.reduce((map, sensor, index) => { 
-            map[sensor.Name] = _.round(this.decodeSensor(buf, 9 + sensor.Offset), 1);
+    decodeRecord(buf, offset, sensors) {
+        let record = { Time: this.decodeTimestamp(buf, offset + 3)};
+        record = sensors.reduce((map, sensor) => { 
+            map[sensor.Name] = _.round(this.decodeSensor(buf, 9 + offset + sensor.Offset), 3);
             return map;
         }, record);
         return record;
@@ -106,24 +105,36 @@ export class WintracFile
     // Timestamps are stored as the number of minutes since the unix epoch (1970-1-1) as a 32-bit unsigned value.
     decodeTimestamp(buf, offset) {
         const minutesSinceEpoch = this.readUIntLE(buf, offset, 4);
-        return moment.utc(0).add(minutesSinceEpoch, 'minute');
+        return new Date(minutesSinceEpoch * 60 * 1000);
     }
 
     // Most sensors are 16-bit signed integers
     decodeSensor(record, offset) {
-        const rawValue = (offset > 0 && offset < record.length - 2) ? this.readIntLE(record, offset, 2): null;
+        const rawValue = this.readIntLE(record, offset, 2);
         return (rawValue && rawValue !== 0x7FFF) ? rawValue / 32.0: null;
     }
 
     getRecords() {
         const sensors = this.getSensorList();
-        const records = this.getTemperatureRecords(this.fileBuffer, sensors).filter(record => record.Time > '2001-01-01');
+        const records = this.getTemperatureRecords(this.fileBuffer, sensors).filter(record => this.defaultRecordFilter(record));
         return records;
     }
 
     toCsv() {
         const records = this.getRecords();
         return Papa.unparse(records);
+    }
+
+    defaultRecordFilter(record) {
+        if (!record.Time || record.Time.getTime() < 978307200000) { 
+            return false;
+        }
+        // We see some records like: 2008-10-10T00:45:00.000Z,1.7,0,0,0,0,0. These are not valid.
+        const values = Object.values(record);
+        if (values.filter(r => r).length <= 2) { 
+            return false;
+        }
+        return true;
     }
 }
 
