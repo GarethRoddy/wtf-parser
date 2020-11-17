@@ -10,8 +10,8 @@ async function getDataMapFromXml(xmlFile) {
         const result = await parseString(xml, { mergeAttrs: true , explicitArray: false})
         let sensorTables  = result.TimedColumnList.typeID;
         let sensors = sensorTables.reduce((map, row) => { 
-            map[row.ID] = row.column.filter(col => sensorRegeX.test(col.Name)).map(col => _.pick(col, "Name", "BlockID", "DataID")).map(col => { 
-                return { Name: col.Name, BlockID: parseInt(col.BlockID, 16), DataID: parseInt(col.DataID, 16) }
+            map[row.ID] = row.column.filter(col => sensorRegeX.test(col.Name)).map(col => _.pick(col, "Name", "BlockID", "DataID", "DisplayOrder")).map(col => { 
+                return { Name: col.Name, BlockID: parseInt(col.BlockID, 16), DataID: parseInt(col.DataID, 16), DisplayOrder: parseInt(col.DisplayOrder) }
             });
             return map;   
         }, {});

@@ -2,6 +2,9 @@
 import * as Papa from 'papaparse';
 import *  as  _ from 'lodash'; 
 
+// Don't use in bifrost...
+const { arrayToHex } = require("./utils")
+
 const sensorMap = require("./wintrac-sensormap.json");
 
 export class WintracFile 
@@ -20,6 +23,18 @@ export class WintracFile
             }
         }
         return true;
+    }
+
+    // Records begin with [0x00, 0xff, 0x54]  or just 0xFF, 0x54?
+    getEventRecords() {
+        let records = this.findOffsets(this.fileBuffer, 0x00, 0xff, 0x54);
+        return records.map((ptr, i, array) => { 
+            return (i < array.length) ? this.decodeEventRecord(this.fileBuffer, ptr): null;
+        }).filter(_.isObject);
+    }
+
+    decodeEventRecord(buf, offset) {
+        return { Time: this.decodeTimestamp(buf, offset + 3), Location: offset, raw: arrayToHex(buf, offset - 1, 48) } 
     }
 
     findOffsets(buf, ...bytes) {
@@ -95,11 +110,11 @@ export class WintracFile
 
     decodeRecord(buf, offset, sensors) {
         let record = { Time: this.decodeTimestamp(buf, offset + 3)};
-        record = sensors.reduce((map, sensor) => { 
-            map[sensor.Name] = _.round(this.decodeSensor(buf, 9 + offset + sensor.Offset), 3);
+        return sensors.reduce((map, sensor) => { 
+            let sensorVal = this.decodeSensor(buf, 9 + offset + sensor.Offset);
+            map[sensor.Name] = _.isFinite(sensorVal) ? _.round(sensorVal, 1): null;
             return map;
         }, record);
-        return record;
     }
 
     // Timestamps are stored as the number of minutes since the unix epoch (1970-1-1) as a 32-bit unsigned value.
@@ -111,7 +126,7 @@ export class WintracFile
     // Most sensors are 16-bit signed integers
     decodeSensor(record, offset) {
         const rawValue = this.readIntLE(record, offset, 2);
-        return (rawValue && rawValue !== 0x7FFF) ? rawValue / 32.0: null;
+        return (rawValue && rawValue !== 0x7FFF && rawValue !== 0x13FF) ? rawValue / 32.0: null;
     }
 
     getRecords() {

@@ -1,0 +1,96 @@
+
+Some Record types:
+
+// Timed log record: 
+Example: ff 46 61 14 79 5b 1 45 16 15 fd 18 ff b4 fd fb fd fe 0 ff 7f 22 0 1 0 1a 0 a2 5 5c 8 bf 1
+Prefix: ff 46 61
+Timestamp: 14 79 5b 1
+Unknown: 45 16 (Always seems to be 45 xx
+Values: 15 fd 18 ff b4 fd fb fd fe 0 ff 7f 22 0 1 0 1a 0 a2 5 5c 8 bf 1
+
+// R4038
+Example: ff 46 61 c 25 64 1 45 6 ff 7f ff 7f 80 0 80 0 80 0 0 0 ff 15 0 ff 54 c 25 64 1 45 4
+Prefix: ff 46 61
+Timestamp: c 25 64 1
+Unknown: 45 6 (Always seems to be 45 xx)
+
+// 00187
+Example: ff 46 61 ae 77 5b 01 45 16 15 fd 50 fd ba fc e7 fc 23 01 ff 7f 22 00 01 00 05 00 96 08 5f 08 c1 01 49 00 63 01 54 fd b0 fc 2d 01 ac 0f 20 03 02 00 00 05 00 00 ff 35 00 ff 46 61 b3 77 
+Prefix: ff 46 61
+Timestamp: ae 77 5b 1
+Unknown: 45 16 (Always seems to be 45 xx)
+
+
+// Timed event record
+ff 54 4d ce 74 1 64 2 0 11 0 a 0 ff 46 61 4d ce
+Prefix: ff 54
+Timestamp: 4d ce 74 1
+Record type: 64 (Defrost), 45: Sensor change
+Length: 2
+
+Always seem to end with 0 c 0 or 0 a 0. Checksum or length? Looks like length, a: 10, c: 12
+
+e.g.
+
+ff 54 14 79 5b 1 64 2 0 17 0 a 0 
+ff 54 ea d1 74 1 45 4 0 98 90 20 fd c 0
+
+  // Timed Defrost Entered
+ {
+    Time: 2016-06-14T19:25:00.000Z,
+    Location: 231077,
+    raw: '13 0 ff 54 4d ce 74 1 64 2 0 11 0 a 0 ff 46 61 4d ce'
+  },
+  // Timed Defrost Entered
+  {
+    Time: 2016-09-06T12:41:00.000Z,
+    Location: 427324,
+    raw: '13 0 ff 54 39 a5 76 1 64 2 0 11 0 a 0 ff 46 61 39 a5'
+  },
+  //Defrost State Exited 
+  {
+    Time: 2016-06-14T19:28:00.000Z,
+    Location: 231112,
+    raw: '13 0 ff 54 50 ce 74 1 64 2 0 13 0 a 0 ff 46 61 50 ce'
+  }
+  {
+    Time: 2016-09-06T12:44:00.000Z,
+    Location: 427359,
+    raw: '13 0 ff 54 3c a5 76 1 64 2 0 13 0 a 0 ff 46 61 3c a5'
+  }
+  // Setpoint Temperature: 5.0
+  {
+    Time: 2016-06-15T00:00:00.000Z,
+    Location: 231741,
+    raw: '13 0 ff 54 60 cf 74 1 45 4 0 98 90 a0 0 c 0 ff 46 61'
+  },
+  // Setpoint Temperature: 5.0
+  {
+    Time: 2016-06-15T10:49:00.000Z,
+    Location: 233032,
+    raw: '0 ff 54 e9 d1 74 1 45 4 0 98 ab 0 0 c 0 ff 54 e9 d1 74 1 45 4'
+  }
+  //Defrost State Exited 
+  {
+    Time: 2016-06-15T01:29:00.000Z,
+    Location: 231954,
+    raw: '13 0 ff 54 b9 cf 74 1 64 2 0 11 0 a 0 ff 46 61 b9 cf'
+  }
+  // Setpoint Temperature: -23.0
+  {
+    Time: 2016-06-15T10:50:00.000Z,
+    Location: 233077,
+    raw: '0 ff 54 ea d1 74 1 45 4 0 98 90 20 fd c 0 ff 54 ea d1 74 1 45 4'
+  },
+  //Variable Differential Defrost Entered
+  {
+    Time: 2016-06-15T15:29:00.000Z,
+    Location: 233746,
+    raw: '0 ff 54 1 d3 74 1 64 2 0 17 0 a 0 ff 46 61 1 d3 74 1 45 5 9a'
+  },
+  // Variable Differential Defrost Entered 
+  {
+    Time: 2013-04-18T21:08:00.000Z,
+    Location: 6224,
+    raw: '35 0 ff 54 14 79 5b 1 64 2 0 17 0 a 0 ff 46 61 14 79 5b 1 45 16 15 fd 18 ff b4 fd fb fd fe 0 ff 7f 22 0 1 0 1a 0 a2 5 5c 8 bf 1'
+  },
