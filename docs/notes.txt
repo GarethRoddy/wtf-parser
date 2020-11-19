@@ -1,6 +1,62 @@
 
 Some Record types:
 
+Timed log: ff 46 61
+
+Event log: ff 54
+
+Files that work well:
+110SP--1.wtf - 0x27: SR2 MT Trailer
+00187--1.wtf - 0x2D: SR3 ST Trailer
+MT577--1.wtf - 0x25: SR2 ST Trailer
+CU1171--1.wtf - 0x2F: SR3 MT Trailer
+40892--1.wtf - 0x2F: SR3 MT Trailer
+43751--1.wtf - 0x2F: SR3 MT Trailer
+CODD1--1.wtf - 0x2F: SR3 MT Trailer
+
+Files that don't (all 0x24: SR2/3/4 CargoWatch ST/MT) (we should probably not support this at the moment..)
+010SP--1.wtf
+110SP--2.wtf
+4262---2.wtf
+R4038--1.wtf
+
+Focus on 110SP--2.wtf and R4038--1.wtf
+// Timed log record: 
+Time,Setpoint Temperature,Logger Sensor 1,Op Mode Zone-1,Setpoint Temperature 2,Logger Sensor 2,Op Mode Zone-2,Logger Sensor 3,Logger Sensor 4,Op Mode,
+4/18/2011 05:18,	3,	3.2,	Heat,	1,	3.8,	Off,	10.3,	8.8,"Diesel, Continuous"
+ff 46 61 7e 65 4b 01 45 0a 65 00 7a 00 02 00 1f 00 22 00 1d 00 12 00 4b 01 1a 01 00 00 ff 1d 00
+Prefix: ff 46 61
+Timestamp: 7e 65 4b 01 (2011-04-18T05:18:00.000Z)
+Unknown: 45 0a
+Sensors: 65 00 7a 00 Logger1, Logger2   
+02 00 1f 00 22 00 1d 00 12 00 
+4b 01 1a 01 : Logger3, Logger4 
+00 00 ff 1d 00
+
+
+
+// Timed log record: 
+Time,Setpoint Temperature,Logger Sensor 1,Op Mode Zone-1,Setpoint Temperature 2,Logger Sensor 2,Op Mode Zone-2,Logger Sensor 3,Logger Sensor 4,Op Mode,
+4/18/2011 17:10,	10,	10.9,	High Cool,	3,	9,	High Cool,	9.5,	6.3,"Diesel, Continuous"
+Prefix: ff 46 61 46 68 4b 01 45 0a 5c 01 20 01 02 00 01 00 22 00 01 00 12 00 30 01 c9 00 00 00 ff 1d 00
+Timestamp: 46 68 4b 01 (2011-04-18T17:10:00.000Z)
+Unknown: 45 0a
+Sensors: 5c 01 20 01 Logger1, Logger2
+02 00 01 00 22 00 01 00 12 00
+30 01 c9 00: Logger3, Logger4
+
+// Timed log record: 
+Time,Setpoint Temperature,Logger Sensor 1,Op Mode Zone-1,Setpoint Temperature 2,Logger Sensor 2,Op Mode Zone-2,Logger Sensor 3,Logger Sensor 4,Op Mode,
+4/18/2011 17:25,	10,	9.8,	Null-Running,	3,	9.1,	High Cool,	9.1,	2.1,"Diesel, Continuous"
+ff 46 61 55 68 4b 01 45 0a 3a 01 23 01 02 00 20 00 22 00 01 00 12 00 23 01 43 00 00 00 ff 1d 00
+Prefix: ff 46 61
+Timestamp: 55 68 4b 01 (2011-04-18T17:25:00.000Z)
+Unknown: 45 0a
+Sensors: 3a 01 23 01
+02 00 20 00 22 00 01 00 12 
+23 01 43 00: Logger3, Logger4
+ 00 00 00 ff 1d 00
+
 // Timed log record: 
 Example: ff 46 61 14 79 5b 1 45 16 15 fd 18 ff b4 fd fb fd fe 0 ff 7f 22 0 1 0 1a 0 a2 5 5c 8 bf 1
 Prefix: ff 46 61
@@ -12,13 +68,33 @@ Values: 15 fd 18 ff b4 fd fb fd fe 0 ff 7f 22 0 1 0 1a 0 a2 5 5c 8 bf 1
 Example: ff 46 61 c 25 64 1 45 6 ff 7f ff 7f 80 0 80 0 80 0 0 0 ff 15 0 ff 54 c 25 64 1 45 4
 Prefix: ff 46 61
 Timestamp: c 25 64 1
-Unknown: 45 6 (Always seems to be 45 xx)
+Unknown: 45 6 (Always seems to be 45 xx), the second would seem to be sensor count.
+
+// R4038
+Time,Setpoint Temperature,Logger Sensor 1,Op Mode Zone-1,Op Mode,
+6/15/2016 00:08,	5,	5,	Mod Cool,"Diesel, Continuous"
+Raw: ff 46 61 68 cf 74 01 45 05 a1 00 18 00 06 00 22 00 00 00 ff 13 00
+Prefix: ff 46 61
+Timestamp: 68 cf 74 01
+Unknown: 45 05 (Always seems to be 45 xx)
+Sensors: a1 00 18 00 06 00 22 00 00 00
+
+Time,Setpoint Temperature,Logger Sensor 1,Op Mode Zone-1,Op Mode,
+6/15/2016 10:59,	-23,	15.7,	High Cool,"Diesel, Continuous"
+Raw: 'ff 46 61 f3 d1 74 01 45 05 f7 01 03 00 01 00 22 00 00 00 ff 13 00' 
+Prefix: ff 46 61
+Timestamp: f3 d1 74 01
+Unknown: 45 05 (Always seems to be 45 xx)
+Sensors: f7 01 (Logger 1 - 15.7)
+03 00 01 00 22 00 00 00
+
 
 // 00187
 Example: ff 46 61 ae 77 5b 01 45 16 15 fd 50 fd ba fc e7 fc 23 01 ff 7f 22 00 01 00 05 00 96 08 5f 08 c1 01 49 00 63 01 54 fd b0 fc 2d 01 ac 0f 20 03 02 00 00 05 00 00 ff 35 00 ff 46 61 b3 77 
 Prefix: ff 46 61
 Timestamp: ae 77 5b 1
 Unknown: 45 16 (Always seems to be 45 xx)
+
 
 
 // Timed event record
@@ -31,6 +107,15 @@ Length: 2
 Always seem to end with 0 c 0 or 0 a 0. Checksum or length? Looks like length, a: 10, c: 12
 
 e.g.
+
+Types: 
+0x45: Sensor change (e.g. Setpoint)
+0x63: Power Switch On / Off:
+0x64: Defrost event
+0x6C: Power Up / Power Down ??
+0x6D: Alarm Cleared
+0x70: Pre-Trip
+0x73: Sensor manifest
 
 ff 54 14 79 5b 1 64 2 0 17 0 a 0 
 ff 54 ea d1 74 1 45 4 0 98 90 20 fd c 0
