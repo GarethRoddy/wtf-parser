@@ -14,11 +14,11 @@ CU1171--1.wtf - 0x2F: SR3 MT Trailer
 43751--1.wtf - 0x2F: SR3 MT Trailer
 CODD1--1.wtf - 0x2F: SR3 MT Trailer
 
-Files that don't (all 0x24: SR2/3/4 CargoWatch ST/MT) (we should probably not support this at the moment..)
-010SP--1.wtf
-110SP--2.wtf
-4262---2.wtf
-R4038--1.wtf
+Files that don't ( 1 x 0x12 (DAS?) and 3 x 0x24: SR2/3/4 CargoWatch ST/MT) (we should probably not support this at the moment..)
+010SP--1.wtf - 0x12: DAS? - Wintrac 6 won't parse this....
+110SP--2.wtf - 0x24: SR2/3/4 CargoWatch ST/MT
+4262---2.wtf - 0x24: SR2/3/4 CargoWatch ST/MT
+R4038--1.wtf - 0x24: SR2/3/4 CargoWatch ST/MT
 
 Focus on 110SP--2.wtf and R4038--1.wtf
 // Timed log record: 

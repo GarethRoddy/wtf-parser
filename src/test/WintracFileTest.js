@@ -51,6 +51,13 @@ describe('WintracFile tests', function() {
                 last: { Time: '2016-09-12T15:18:00.000Z' , "Logger Sensor 1": 19.3 },
                 parseTimeMs: 550 
             },
+            {
+                file: "../sample_files/4262---2.wtf",
+                recordCount: 103970,
+                first: { Time: '2014-09-15T18:16:00.000Z', "Setpoint Temperature": 0, "Logger Sensor 1": 14.9 },
+                last: { Time: '2016-08-16T10:52:00.000Z' , "Setpoint Temperature": -22, "Logger Sensor 1": -2.4 },
+                parseTimeMs: 1500
+            },
         ]
         for(let input of inputs) {
             it(`Should parse file ${input.file} and return records`, function() {
