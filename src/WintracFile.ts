@@ -38,7 +38,7 @@ export class WintracFile
         } else if (eventType === EventTypes.SensorChange) {
             const mappedSensor = this.findSensor(buf, offset + 10);
             if (mappedSensor) {
-                record.SensorChanges = { [mappedSensor.Name] : this.decodeSensor(buf, offset + 12)};
+                record.SensorChanges = { [mappedSensor.Name] : this.decodeSensor(buf, offset + 12, mappedSensor)};
             }
         }
         return record;
@@ -71,17 +71,97 @@ export class WintracFile
     }
 
     decodeRecord(buf, offset, sensors, length, sensorTemplate = {}) {
-        let record = { Time: this.decodeTimestamp(buf, offset + 3), /*location: offset, raw: arrayToHex(buf, offset, 40),*/...sensorTemplate };
-        return sensors.reduce((map, sensor) => ({ ...map, [sensor.Name]: this.decodeSensor(buf, 9 + offset + sensor.Offset) }), record);
+        let record = { Time: this.decodeTimestamp(buf, offset + 3), /*manifest: JSON.stringify(sensors.map(s => _.pick(s, "Name", "Offset"))), raw: arrayToHex(buf, offset, length), location: offset, length ,*/...sensorTemplate };
+        record = sensors.reduce((map, sensor) => ({ ...map, [sensor.Name]: this.decodeSensor(buf, 9 + offset + sensor.Offset, sensor) }), record);
+        if (_.isFinite(record["Control Configuration"])) {
+            record["Unit Operating Mode"] = this.decodeCCFG(record["Control Configuration"]);
+        }
+        return record;
     }
 
     decodeTimestamp(buf, offset) {
         return new Date(this.readUIntLE(buf, offset, 4) * 60 * 1000);  // Timestamps are stored as the number of minutes since the unix epoch (1970-1-1) as a 32-bit unsigned value.
     }
 
-    decodeSensor(record, offset) {
-        const rawValue = this.readIntLE(record, offset, 2); // Most sensors are 16-bit signed integers
-        return (_.isFinite(rawValue) && rawValue !== 0x7FFF && rawValue !== 0x13FF) ? _.round(rawValue / 32.0, 1): null;
+    decodeOpmode(record, offset) {
+        const rawValue = this.readIntLE(record, offset, 2);
+        switch (rawValue) {
+            case 0x0001:
+            case 0x0003:
+            case 0x00010:
+                return "Cool";
+
+            case 0x0002: 
+                return "High Mod Cool";
+
+            case 0x0006: 
+                return "Mod Cool";
+
+            case 0x000c:
+            case 0x001a:
+            case 0x002a:
+                return "Defrost";
+
+            case 0x000e:
+            case 0x001f:
+            case 0x0024:
+                return "Heat";
+
+            case 0x00013:
+                return "Mod Heat";
+            case 0x00018:
+            case 0x0021:
+                return "Null";
+
+            case 0x0022:
+                return "Shutdown";
+
+            case 0x001b:
+                return "Mod cool";
+
+            case 0x001d:
+                return "Off";
+
+            case 0x001e:
+                return "----";
+
+            case 0x0020:
+                return "Null, Fans on";
+
+            default:
+                return "Unknown - 0x" + rawValue.toString(16);
+        }
+    }
+
+    decodeCCFG(ccfg) {
+        switch (ccfg) { 
+            case 0:
+            case 1:
+                return "Diesel, Cycle-Sentry";
+
+            case 2:
+            case 3:
+            case 24:
+                return "Diesel, Continuous";
+
+            case 6:
+            case 7:
+                return "Electric, Continuous";
+
+            default:
+                return "Unknown Unit mode - 0x" + ccfg.toString("16");
+        }
+    }
+
+    decodeSensor(record, offset, sensor) {
+        if (sensor.DataID === 46) { // Control Configuration
+            return this.readIntLE(record, offset, 2);
+        } else if (sensor.DataID === 97) { // Zone Opmode
+            return this.decodeOpmode(record, offset);
+        } else {
+            const rawValue = this.readIntLE(record, offset, 2); // Most sensors are 16-bit signed integers
+            return (_.isFinite(rawValue) && rawValue !== 0x7FFF && rawValue !== 0x13FF) ? _.round(rawValue / 32.0, 1): null;
+        }
     }
 
     get recordPrefixes() {

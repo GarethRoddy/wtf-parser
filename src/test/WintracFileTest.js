@@ -18,7 +18,7 @@ describe('WintracFile tests', function() {
         let inputs = [
             {
                 file: "../sample_files/00187--1.wtf",
-                recordCount: 2057,
+                recordCount: 2075,
                 first: { Time: '2013-04-18T15:02:00.000Z', Setpoint: -23.3, "Return Control": -13.2, Ambient: 6.3 },
                 last: { Time: '2013-05-06T23:15:00.000Z' , Setpoint:  17.8, "Return Control": 17.8, Ambient: 20.6 },
                 parseTimeMs: 250
@@ -32,7 +32,7 @@ describe('WintracFile tests', function() {
             },
             {
                 file: "../sample_files/MT577--1.wtf",
-                recordCount: 6028,
+                recordCount: 6119,
                 first: { Time: '2008-03-04T18:36:00.000Z', Setpoint: 0, "Return Control": 30.4 },
                 last: { Time: '2008-10-13T20:10:00.000Z', Setpoint: 1.7, "Return Control": 19.5 },
                 parseTimeMs: 250
@@ -42,21 +42,21 @@ describe('WintracFile tests', function() {
                 recordCount: 14100,
                 first: { Time: '2020-07-28T00:00:00.000Z', "Setpoint Zone-1": -21.0, "Return Zone-1": -19.8 },
                 last: { Time: '2020-08-18T08:26:00.000Z', "Setpoint Zone-1": -21.0, "Return Zone-1": -18.3 },
-                parseTimeMs: 750
+                parseTimeMs: 1000
             },
             {
                 file: "../sample_files/R4038--1.wtf",
-                recordCount: 23197, 
-                first: { Time: '2014-10-21T09:07:00.000Z', "Logger Sensor 1": -31.8, "Logger Sensor 2": -8.1 }, 
+                recordCount: 23304, 
+                first: { Time: '2014-05-18T13:00:00.000Z' }, 
                 last: { Time: '2016-09-12T15:18:00.000Z' , "Logger Sensor 1": 19.3 },
                 parseTimeMs: 550 
             },
             {
                 file: "../sample_files/4262---2.wtf",
-                recordCount: 103970,
-                first: { Time: '2014-09-15T18:16:00.000Z', "Setpoint Temperature": 0, "Logger Sensor 1": 14.9 },
+                recordCount: 103977,
+                first: { Time: '2014-06-21T21:38:00.000Z', "Setpoint Temperature": 0, "Logger Sensor 1": 18.6 },
                 last: { Time: '2016-08-16T10:52:00.000Z' , "Setpoint Temperature": -22, "Logger Sensor 1": -2.4 },
-                parseTimeMs: 1500
+                parseTimeMs: 2000
             },
         ]
         for(let input of inputs) {

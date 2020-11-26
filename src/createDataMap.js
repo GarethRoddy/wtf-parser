@@ -2,7 +2,7 @@ const fs = require("fs");
 const path = require("path");
 const _ = require("lodash");
 
-const sensorRegeX = /setpoint|return(?! display)|coil|discharge(?! display| pressure)|ambient|spare|logger/i
+const sensorRegeX = /setpoint|return(?! display)|coil|discharge(?! display| pressure)|ambient|logger|System Operating Mode|op\s?mode|Control Configuration/i
 async function getDataMapFromXml(xmlFile) {
     const parseString = require('xml2js').parseStringPromise;
     try { 
@@ -24,6 +24,7 @@ async function getDataMapFromXml(xmlFile) {
 
 async function exportDataMap(xmlFile) {
     let sensors = await getDataMapFromXml(xmlFile);
+    sensors['0x2F'].push( { Name: "ETV Position", BlockID: 0x16, DataID: 0x11 })
     fs.writeFileSync(path.join(__dirname, "./dist/wintrac-sensormap.json"), JSON.stringify(sensors, null, 4));
 }
 
