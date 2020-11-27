@@ -1,6 +1,6 @@
 {
   "name": "wtf-parser",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "description": "WTF File parser.",
   "main": "app.js",
   "scripts": {

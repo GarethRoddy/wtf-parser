@@ -27,7 +27,7 @@ export class WintracFile
 
     decodeEventRecord(buf, offset) {
         const eventType = buf[offset + 7];
-        const record = { Time: this.decodeTimestamp(buf, offset + 3), Location: offset, Raw: arrayToHex(buf, offset, 48), Type: eventType, Sensors: [], SensorChanges: null };
+        const record = { Time: this.decodeTimestamp(buf, offset + 3), /*Location: offset, Raw: arrayToHex(buf, offset, 48),*/ Type: eventType, Sensors: [], SensorChanges: null };
         if (eventType === EventTypes.SensorManifest) {
             const sensorCount = this.readUIntLE(buf, offset + 10, 2)
             record.Sensors = _.range(sensorCount).reduce((acc, sensor, index) => { 
@@ -144,6 +144,9 @@ export class WintracFile
             case 24:
                 return "Diesel, Continuous";
 
+            case 4:
+                return "Electric, Cycle-Sentry";
+
             case 6:
             case 7:
                 return "Electric, Continuous";
@@ -184,7 +187,10 @@ export class WintracFile
     }
 
     toCsv() {
-        return Papa.unparse(this.getRecords());
+        /* We must explicitly set fields, since Papa Parse will drop headers othwerwise */
+        const data = this.getRecords();
+        const fields = Array.from(data.reduce((acc, r) => (Object.keys(r).reduce((acc, key) => acc.add(key), acc)), new Set()));
+        return Papa.unparse({ data, fields });
     }
 
     defaultRecordFilter(record) {
