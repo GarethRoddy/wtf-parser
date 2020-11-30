@@ -71,8 +71,10 @@ export class WintracFile
     }
 
     decodeRecord(buf, offset, sensors, length, sensorTemplate = {}) {
-        let record = { Time: this.decodeTimestamp(buf, offset + 3), /*manifest: JSON.stringify(sensors.map(s => _.pick(s, "Name", "Offset"))), raw: arrayToHex(buf, offset, length), location: offset, length ,*/...sensorTemplate };
-        record = sensors.reduce((map, sensor) => ({ ...map, [sensor.Name]: this.decodeSensor(buf, 9 + offset + sensor.Offset, sensor) }), record);
+        const record = sensors.reduce((map, sensor) => {
+            map[sensor.Name] = this.decodeSensor(buf, 9 + offset + sensor.Offset, sensor);
+            return map;
+        }, { Time: this.decodeTimestamp(buf, offset + 3), ...sensorTemplate });
         if (_.isFinite(record["Control Configuration"])) {
             record["Unit Operating Mode"] = this.decodeCCFG(record["Control Configuration"]);
         }
@@ -186,9 +188,13 @@ export class WintracFile
         return _.orderBy(res.temperatures.filter(record => this.defaultRecordFilter(record)), t => t.Time.getTime());
     }
 
-    toCsv() {
+    toCsv(latestDataToKeepSeconds) {
         /* We must explicitly set fields, since Papa Parse will drop headers othwerwise */
-        const data = this.getRecords();
+        let data = this.getRecords();
+        if (latestDataToKeepSeconds) {
+            const thresholdUnixTime = _.last(data).Time.getTime() - latestDataToKeepSeconds*1000;
+            data = data.filter(t => t.Time.getTime() >= thresholdUnixTime);
+        }
         const fields = Array.from(data.reduce((acc, r) => (Object.keys(r).reduce((acc, key) => acc.add(key), acc)), new Set()));
         return Papa.unparse({ data, fields });
     }

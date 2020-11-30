@@ -76,4 +76,27 @@ describe('WintracFile tests', function() {
             });
         }
     });
+
+    describe('CSV Conversion', function() {
+        this.timeout(10000);
+        let inputs = [
+            {
+                file: "../sample_files/4262---2.wtf",
+                lineCount: 103978,
+                conversionTimeMs: 5000
+            },
+        ]
+        for(let input of inputs) {
+            it(`Should parse file ${input.file} and return records`, function() {
+                let data = fs.readFileSync(input.file)
+                let start = Date.now();
+                let wtf = new WintracFile([...data]);
+                let csv = wtf.toCsv();
+                let csvLines = csv.split("\n");
+                let conversionTimeMs = Date.now() - start;
+                assert.strictEqual(csvLines.length, input.lineCount, "Expect line counts to match");
+                console.log(`Conversion time (${input.file}: ${conversionTimeMs}ms)`)
+            });
+        }
+    });
 })
