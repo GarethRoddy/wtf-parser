@@ -188,7 +188,7 @@ export class WintracFile
         return _.orderBy(res.temperatures.filter(record => this.defaultRecordFilter(record)), t => t.Time.getTime());
     }
 
-    toCsv(latestDataToKeepSeconds) {
+    toCsv(latestDataToKeepSeconds = null) {
         /* We must explicitly set fields, since Papa Parse will drop headers othwerwise */
         let data = this.getRecords();
         if (latestDataToKeepSeconds) {
